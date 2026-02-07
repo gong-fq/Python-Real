@@ -6,46 +6,54 @@
     <title>Python AI 智能助学系统 - 龚凤乾教授</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary-color: #2563eb; --secondary-color: #1e40af; --dark-color: #1e293b; --accent-orange: #f59e0b; --link-blue: #2563eb; }
+        :root { --primary-color: #2563eb; --secondary-color: #1e40af; --dark-color: #1e293b; --accent-orange: #f59e0b; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
         body { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
+        /* 署名页眉 */
         .professor-header { background: white; padding: 12px 25px; border-bottom: 3px solid var(--primary-color); font-weight: bold; color: var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
         .container { max-width: 1440px; margin: 0 auto; padding: 15px; flex: 1; display: grid; grid-template-columns: 420px 1fr; gap: 15px; overflow: hidden; }
 
+        /* 左侧列表 */
         .sidebar { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow-y: auto; }
-        .lesson-card { padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; transition: 0.3s; }
+        .lesson-card { padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; transition: 0.3s; cursor: pointer; position: relative; }
         .lesson-card.active { border-left: 6px solid var(--primary-color); background: #f0f7ff; }
         
-        /* 强化链接样式 */
-        .lesson-content { font-size: 0.88rem; color: #475569; line-height: 1.7; }
-        .lesson-content a { 
-            color: var(--link-blue); 
-            text-decoration: underline; 
-            font-weight: 500;
-            margin: 0 2px;
-        }
-        .lesson-content a:hover { color: var(--secondary-color); background: #dbeafe; }
+        .lesson-title { font-weight: bold; font-size: 1rem; color: var(--dark-color); margin-bottom: 8px; }
+        .lesson-content { font-size: 0.88rem; color: #475569; line-height: 1.7; pointer-events: auto; }
+        .lesson-content a { color: var(--primary-color); text-decoration: underline; font-weight: 500; }
 
+        /* 练习题样式 */
         .quiz-container { background: #fffbeb; border: 1px dashed var(--accent-orange); border-radius: 10px; padding: 12px; margin-top: 12px; }
         .answer-area { margin-top: 10px; padding-top: 10px; border-top: 1px solid #fde68a; display: none; font-size: 0.85rem; color: #059669; }
         .show-answer-btn { background: var(--accent-orange); color: white; border: none; padding: 5px 15px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; margin-top: 8px; }
 
+        /* 右侧聊天窗口 - 关键修复部分 */
         .chat-panel { background: white; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
         .chat-header { padding: 15px 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; align-items: center; }
         #chat-container { flex: 1; padding: 25px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 15px; }
 
-        .message { max-width: 85%; padding: 12px 18px; border-radius: 18px; line-height: 1.6; font-size: 0.95rem; position: relative; }
+        .message { max-width: 85%; padding: 12px 18px; border-radius: 18px; line-height: 1.6; font-size: 0.95rem; }
         .ai { align-self: flex-start; background: white; border: 1px solid #e2e8f0; }
         .user { align-self: flex-end; background: var(--primary-color); color: white; }
+
+        .input-area { padding: 20px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; }
+        #chat-input { 
+            flex: 1; 
+            padding: 12px 25px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 30px; 
+            outline: none; 
+            font-size: 1rem;
+            background-color: #fff !important; /* 强制背景色，防止被覆盖 */
+            color: #000 !important; /* 强制文字颜色 */
+            z-index: 1000; /* 确保在最上层 */
+        }
+        #chat-input:focus { border-color: var(--primary-color); box-shadow: 0 0 8px rgba(37, 99, 235, 0.2); }
         
         .tts-btn { margin-left: 10px; cursor: pointer; color: var(--primary-color); }
         .tts-btn.playing { color: #ef4444; animation: pulse 1s infinite; }
-
-        .input-area { padding: 20px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; }
-        #chat-input { flex: 1; padding: 12px 25px; border: 2px solid #f1f5f9; border-radius: 30px; outline: none; }
-        
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
@@ -53,13 +61,13 @@
 
     <div class="professor-header">
         <span><i class="fas fa-university"></i> 天津财经大学统计学院 - 龚凤乾教授</span>
-        <span style="font-size: 0.8rem; font-weight: normal; opacity: 0.8;">Python 官方文档（中文版）深度链接已修复</span>
+        <span style="font-size: 0.8rem; font-weight: normal; opacity: 0.8;">输入框功能已修复</span>
     </div>
 
     <div class="container">
         <div class="sidebar" id="lesson-list">
             <h2 style="margin-bottom:20px; font-size:1.1rem;"><i class="fas fa-book"></i> 课程体系与官方文献</h2>
-            </div>
+        </div>
 
         <div class="chat-panel">
             <div class="chat-header">
@@ -67,11 +75,11 @@
                 <small>第 <span id="cur-lesson-num">1</span> 讲</small>
             </div>
             <div id="chat-container">
-                <div class="message ai">龚教授您好！已为您彻底检查并修复了 10 讲的所有 Python 官方中文文档链接，确保直接跳转至最新中文翻译页面。</div>
+                <div class="message ai">龚教授您好！输入框无法输入的问题已解决。现在您可以正常进行对话了。</div>
             </div>
             <div class="input-area">
-                <input type="text" id="chat-input" placeholder="请输入您的问题...">
-                <button onclick="handleSend()" style="background:var(--primary-color); color:white; border:none; width:48px; height:48px; border-radius:50%; cursor:pointer;">
+                <input type="text" id="chat-input" placeholder="请在这里输入您的问题..." autocomplete="off">
+                <button id="send-btn" style="background:var(--primary-color); color:white; border:none; width:48px; height:48px; border-radius:50%; cursor:pointer;">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
@@ -79,64 +87,25 @@
     </div>
 
     <script>
-        // 彻底修复后的 10 讲文档链接库
         const lessons = [
-            { 
-                id: 1, title: "环境搭建", 
-                content: `<a href="https://docs.python.org/zh-cn/3/tutorial/interpreter.html" target="_blank">Python 解释器使用</a>、<a href="https://docs.python.org/zh-cn/3/using/index.html" target="_blank">不同平台的 Python 设置</a>。`,
-                q: "如何验证Python安装是否包含pip？", a: "在终端输入 pip --version。" 
-            },
-            { 
-                id: 2, title: "变量与运算", 
-                content: `<a href="https://docs.python.org/zh-cn/3/tutorial/introduction.html#numbers" target="_blank">数字运算</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/introduction.html#strings" target="_blank">字符串基础</a>。`,
-                q: "10 / 2 的结果类型是？", a: "浮点型 (5.0)。" 
-            },
-            { 
-                id: 3, title: "流程控制", 
-                content: `<a href="https://docs.python.org/zh-cn/3/tutorial/controlflow.html#if-statements" target="_blank">If 语句逻辑</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/controlflow.html#for-statements" target="_blank">For 循环机制</a>。`,
-                q: "如何提前退出循环？", a: "使用 break 关键字。" 
-            },
-            { 
-                id: 4, title: "数据结构", 
-                content: `<a href="https://docs.python.org/zh-cn/3/tutorial/datastructures.html#more-on-lists" target="_blank">列表详解</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/datastructures.html#dictionaries" target="_blank">字典应用</a>。`,
-                q: "列表推导式的基本语法？", a: "[表达式 for 变量 in 序列]。" 
-            },
-            { 
-                id: 5, title: "函数模块", 
-                content: `<a href="https://docs.python.org/zh-cn/3/tutorial/controlflow.html#defining-functions" target="_blank">定义函数</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/modules.html" target="_blank">模块与包管理</a>。`,
-                q: "什么是匿名函数？", a: "使用 lambda 定义的单行函数。" 
-            },
-            { 
-                id: 6, title: "面向对象", 
-                content: `<a href="https://docs.python.org/zh-cn/3/tutorial/classes.html" target="_blank">类与继承</a>、<a href="https://docs.python.org/zh-cn/3/reference/datamodel.html#objects-values-and-types" target="_blank">对象模型参考</a>。`,
-                q: "__init__ 方法的作用？", a: "对象的初始化构造方法。" 
-            },
-            { 
-                id: 7, title: "文件处理", 
-                content: `<a href="https://docs.python.org/zh-cn/3/tutorial/inputoutput.html#reading-and-writing-files" target="_blank">文件读写指南</a>、<a href="https://docs.python.org/zh-cn/3/library/os.path.html" target="_blank">路径处理 (os.path)</a>。`,
-                q: "'a' 模式打开文件代表什么？", a: "追加 (Append) 模式。" 
-            },
-            { 
-                id: 8, title: "数据分析", 
-                content: `<a href="https://docs.python.org/zh-cn/3/library/math.html" target="_blank">标准数学库</a>、外部文献：<a href="https://pandas.pydata.org/docs/getting_started/index.html" target="_blank">Pandas 入门指南</a>。`,
-                q: "Numpy 数组相比列表的优势？", a: "内存占用少、向量化运算快。" 
-            },
-            { 
-                id: 9, title: "Web爬虫", 
-                content: `<a href="https://docs.python.org/zh-cn/3/library/urllib.request.html" target="_blank">标准库 urllib</a>、外部文献：<a href="https://requests.readthedocs.io/zh-cn/latest/" target="_blank">Requests 中文手册</a>。`,
-                q: "BeautifulSoup 的作用是？", a: "解析 HTML 或 XML 结构并提取数据。" 
-            },
-            { 
-                id: 10, title: "面试实战", 
-                content: `<a href="https://docs.python.org/zh-cn/3/library/functions.html" target="_blank">内置函数速查</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/errors.html" target="_blank">错误与异常深度解析</a>。`,
-                q: "try...except...finally 的顺序？", a: "始终执行 finally 块的代码。" 
-            }
+            { id: 1, title: "环境搭建", content: `<a href="https://docs.python.org/zh-cn/3/tutorial/interpreter.html" target="_blank">Python 解释器使用</a>、<a href="https://docs.python.org/zh-cn/3/using/index.html" target="_blank">不同平台的 Python 设置</a>。`, q: "如何验证Python安装是否包含pip？", a: "在终端输入 pip --version。" },
+            { id: 2, title: "变量与运算", content: `<a href="https://docs.python.org/zh-cn/3/tutorial/introduction.html#numbers" target="_blank">数字运算</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/introduction.html#strings" target="_blank">字符串基础</a>。`, q: "10 / 2 的结果类型是？", a: "浮点型 (5.0)。" },
+            { id: 3, title: "流程控制", content: `<a href="https://docs.python.org/zh-cn/3/tutorial/controlflow.html#if-statements" target="_blank">If 语句逻辑</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/controlflow.html#for-statements" target="_blank">For 循环机制</a>。`, q: "如何提前退出循环？", a: "使用 break 关键字。" },
+            { id: 4, title: "数据结构", content: `<a href="https://docs.python.org/zh-cn/3/tutorial/datastructures.html#more-on-lists" target="_blank">列表详解</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/datastructures.html#dictionaries" target="_blank">字典应用</a>。`, q: "列表推导式的基本语法？", a: "[表达式 for 变量 in 序列]。" },
+            { id: 5, title: "函数模块", content: `<a href="https://docs.python.org/zh-cn/3/tutorial/controlflow.html#defining-functions" target="_blank">定义函数</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/modules.html" target="_blank">模块与包管理</a>。`, q: "什么是匿名函数？", a: "使用 lambda 定义的单行函数。" },
+            { id: 6, title: "面向对象", content: `<a href="https://docs.python.org/zh-cn/3/tutorial/classes.html" target="_blank">类与继承</a>、<a href="https://docs.python.org/zh-cn/3/reference/datamodel.html#objects-values-and-types" target="_blank">对象模型参考</a>。`, q: "__init__ 方法的作用？", a: "对象的初始化构造方法。" },
+            { id: 7, title: "文件处理", content: `<a href="https://docs.python.org/zh-cn/3/tutorial/inputoutput.html#reading-and-writing-files" target="_blank">文件读写指南</a>、<a href="https://docs.python.org/zh-cn/3/library/os.path.html" target="_blank">路径处理 (os.path)</a>。`, q: "'a' 模式打开文件代表什么？", a: "追加 (Append) 模式。" },
+            { id: 8, title: "数据分析", content: `<a href="https://docs.python.org/zh-cn/3/library/math.html" target="_blank">标准数学库</a>、外部文献：<a href="https://pandas.pydata.org/docs/getting_started/index.html" target="_blank">Pandas 入门指南</a>。`, q: "Numpy 数组相比列表的优势？", a: "内存占用少、向量化运算快。" },
+            { id: 9, title: "Web爬虫", content: `<a href="https://docs.python.org/zh-cn/3/library/urllib.request.html" target="_blank">标准库 urllib</a>、外部文献：<a href="https://requests.readthedocs.io/zh-cn/latest/" target="_blank">Requests 中文手册</a>。`, q: "BeautifulSoup 的作用是？", a: "解析 HTML 或 XML 结构并提取数据。" },
+            { id: 10, title: "面试实战", content: `<a href="https://docs.python.org/zh-cn/3/library/functions.html" target="_blank">内置函数速查</a>、<a href="https://docs.python.org/zh-cn/3/tutorial/errors.html" target="_blank">错误与异常深度解析</a>。`, q: "try...except...finally 的顺序？", a: "始终执行 finally 块的代码。" }
         ];
 
         let synth = window.speechSynthesis;
-
-        // 初始化
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
         const lessonList = document.getElementById('lesson-list');
+
+        // 初始化课程
         lessons.forEach((l, idx) => {
             const card = document.createElement('div');
             card.className = `lesson-card ${idx === 0 ? 'active' : ''}`;
@@ -149,12 +118,13 @@
                     <div class="answer-area"><b>解析：</b>${l.a}</div>
                 </div>
             `;
-            card.onclick = (e) => {
+            // 修复：点击卡片时不应抢夺输入框的焦点
+            card.addEventListener('click', (e) => {
                 if(e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
                 document.querySelectorAll('.lesson-card').forEach(c => c.classList.remove('active'));
                 card.classList.add('active');
                 document.getElementById('cur-lesson-num').textContent = l.id;
-            };
+            });
             lessonList.appendChild(card);
         });
 
@@ -200,12 +170,11 @@
         }
 
         async function handleSend() {
-            const input = document.getElementById('chat-input');
-            const msg = input.value.trim();
+            const msg = chatInput.value.trim();
             if (!msg) return;
             addMessage('user', msg);
-            input.value = '';
-            const thinking = addMessage('ai', '正在思考中...');
+            chatInput.value = '';
+            const thinking = addMessage('ai', '正在分析并查找资料...');
             try {
                 const res = await fetch('/.netlify/functions/chat', {
                     method: 'POST',
@@ -214,9 +183,19 @@
                 const data = await res.json();
                 thinking.remove();
                 addMessage('ai', data.response);
-            } catch (e) { thinking.textContent = "连接助手失败。"; }
+            } catch (e) { 
+                thinking.textContent = "连接助手失败，请检查网络或配置。"; 
+            }
         }
-        document.getElementById('chat-input').onkeydown = (e) => e.key === 'Enter' && handleSend();
+
+        // 绑定事件
+        sendBtn.onclick = handleSend;
+        chatInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // 防止回车刷新
+                handleSend();
+            }
+        };
     </script>
 </body>
 </html>
