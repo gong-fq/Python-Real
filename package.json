@@ -1,6 +1,6 @@
 {
-  "name": "python-ai-tutor-pro",
-  "version": "1.1.0",
+  "name": "python-ai-tutor-gong",
+  "version": "1.0.0",
   "dependencies": {
     "axios": "^1.6.0"
   }

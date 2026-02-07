@@ -3,95 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python AI 智能助学系统</title>
+    <title>Python AI 智能助学系统 - 龚凤乾教授</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary-color: #2563eb; --secondary-color: #1e40af; --dark-color: #1e293b; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); min-height: 100vh; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 320px 1fr; gap: 20px; height: 95vh; }
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+        }
         
-        .sidebar { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow-y: auto; }
-        .lesson-card { padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; }
-        .lesson-card.active { background: var(--primary-color); color: white; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--dark-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .chat-panel { background: white; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
-        .chat-header { padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; }
+        /* 教授署名页眉 */
+        .professor-header {
+            background: white;
+            padding: 10px 25px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        /* 左侧 10 讲课程列表 */
+        .sidebar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+        .sidebar h2 { font-size: 1.2rem; margin-bottom: 15px; color: var(--primary-color); }
+        
+        .lesson-card {
+            padding: 12px 15px;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .lesson-card:hover { border-color: var(--accent-color); background: #f0f7ff; }
+        .lesson-card.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .lesson-card h4 { font-size: 0.95rem; margin-bottom: 3px; }
+        .lesson-card p { font-size: 0.75rem; opacity: 0.8; }
+
+        /* 右侧聊天窗口 */
+        .chat-panel {
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .chat-header { padding: 15px 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; }
+        
         #chat-container { flex: 1; padding: 20px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 15px; }
         
-        .message { max-width: 85%; padding: 12px 18px; border-radius: 15px; font-size: 0.95rem; white-space: pre-wrap; }
-        .ai { align-self: flex-start; background: white; border: 1px solid #e2e8f0; }
-        .user { align-self: flex-end; background: var(--primary-color); color: white; }
-        .thinking { color: #64748b; font-style: italic; background: transparent !important; }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 15px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; }
+        .ai { align-self: flex-start; background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 2px; }
+        .user { align-self: flex-end; background: var(--primary-color); color: white; border-bottom-right-radius: 2px; }
+        .thinking { color: #94a3b8; font-style: italic; background: transparent !important; border: none !important; }
 
-        .input-area { padding: 20px; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px 20px; border: 2px solid #f1f5f9; border-radius: 30px; outline: none; }
-        button { background: var(--primary-color); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+        /* 输入框修复 */
+        .input-area { padding: 20px; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; background: white; }
+        #chat-input { 
+            flex: 1; 
+            padding: 12px 20px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 30px; 
+            outline: none; 
+            font-size: 1rem;
+            color: var(--dark-color);
+        }
+        #chat-input:focus { border-color: var(--primary-color); }
+        
+        button { 
+            background: var(--primary-color); 
+            color: white; 
+            border: none; 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button:hover { background: var(--secondary-color); }
     </style>
 </head>
 <body>
+    <div class="professor-header">
+        <i class="fas fa-university"></i> 天津财经大学统计学院 &nbsp;&nbsp; 龚凤乾教授
+    </div>
+
     <div class="container">
         <div class="sidebar">
-            <h2 style="margin-bottom:20px"><i class="fas fa-book"></i> 课程进度</h2>
+            <h2><i class="fas fa-list-ol"></i> 课程体系</h2>
             <div id="lesson-list">
-                <div class="lesson-card active" data-lesson="1"><h4>第1讲：环境搭建</h4><p>Python安装与配置</p></div>
-                <div class="lesson-card" data-lesson="2"><h4>第2讲：基础语法</h4><p>变量与数据类型</p></div>
+                <div class="lesson-card active" data-lesson="1"><h4>第1讲：环境搭建</h4><p>Python安装与IDE配置</p></div>
+                <div class="lesson-card" data-lesson="2"><h4>第2讲：变量与基础运算</h4><p>数据类型与数学运算</p></div>
+                <div class="lesson-card" data-lesson="3"><h4>第3讲：流程控制</h4><p>If判断与循环语句</p></div>
+                <div class="lesson-card" data-lesson="4"><h4>第4讲：数据结构</h4><p>列表、元组、字典与集合</p></div>
+                <div class="lesson-card" data-lesson="5"><h4>第5讲：函数编程</h4><p>定义与参数传递</p></div>
+                <div class="lesson-card" data-lesson="6"><h4>第6讲：面向对象</h4><p>类、继承与多态</p></div>
+                <div class="lesson-card" data-lesson="7"><h4>第7讲：文件与异常</h4><p>IO操作与Debug技巧</p></div>
+                <div class="lesson-card" data-lesson="8"><h4>第8讲：数据分析入门</h4><p>Pandas与Matplotlib</p></div>
+                <div class="lesson-card" data-lesson="9"><h4>第9讲：Web爬虫基础</h4><p>Requests与正则</p></div>
+                <div class="lesson-card" data-lesson="10"><h4>第10讲：面试实战精讲</h4><p>简历准备与算法面试</p></div>
             </div>
         </div>
+
         <div class="chat-panel">
             <div class="chat-header">
-                <span><i class="fas fa-robot"></i> Python 智能助手</span>
-                <span>当前：第 <span id="cur-lesson">1</span> 讲</span>
+                <span><i class="fas fa-robot"></i> Python 助学导师</span>
+                <small>正在学习：第 <span id="current-lesson-id">1</span> 讲</small>
             </div>
-            <div id="chat-container"></div>
+            
+            <div id="chat-container">
+                <div class="message ai">您好！我是您的 Python 助学导师。在学习龚凤乾教授的课程过程中，有任何问题请随时问我。</div>
+            </div>
+            
             <div class="input-area">
-                <input type="text" id="chat-input" placeholder="请问关于本节课的问题...">
+                <input type="text" id="chat-input" placeholder="请在这里输入您的问题...">
                 <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
     <script>
-        let chatHistory = []; // 用于保存上下文
+        let history = []; 
         const chatContainer = document.getElementById('chat-container');
         const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const lessonCards = document.querySelectorAll('.lesson-card');
+        const lessonNumDisplay = document.getElementById('current-lesson-id');
+
+        // 课程选择
+        lessonCards.forEach(card => {
+            card.addEventListener('click', () => {
+                lessonCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                const id = card.dataset.lesson;
+                lessonNumDisplay.textContent = id;
+                addMessage('ai', `已为您切换到第 ${id} 讲课程上下文。`);
+            });
+        });
 
         function addMessage(sender, text) {
-            const msg = document.createElement('div');
-            msg.className = `message ${sender}`;
-            msg.textContent = text;
-            chatContainer.appendChild(msg);
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.textContent = text;
+            chatContainer.appendChild(div);
             chatContainer.scrollTop = chatContainer.scrollHeight;
-            return msg;
+            return div;
         }
 
-        async function sendMessage() {
+        async function handleSend() {
             const text = chatInput.value.trim();
             if (!text) return;
 
             addMessage('user', text);
             chatInput.value = '';
-            const thinking = addMessage('ai', '正在分析意图并检索知识...');
+
+            const thinking = addMessage('ai', '正在思考中...');
             thinking.classList.add('thinking');
 
             try {
-                const lessonId = document.querySelector('.lesson-card.active').dataset.lesson;
+                const currentLesson = document.querySelector('.lesson-card.active').dataset.lesson;
+                
                 const response = await fetch('/.netlify/functions/chat', {
                     method: 'POST',
-                    body: JSON.stringify({ message: text, lesson: lessonId, history: chatHistory })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        lesson: currentLesson,
+                        history: history
+                    })
                 });
-                
+
                 const data = await response.json();
                 thinking.remove();
                 addMessage('ai', data.response);
-                chatHistory = data.history || []; // 更新历史记录
+                
+                // 更新历史用于上下文感知
+                history.push({ role: "user", content: text });
+                history.push({ role: "assistant", content: data.response });
+                if (history.length > 10) history.shift(); 
+
             } catch (err) {
-                thinking.textContent = "连接助手失败，请检查网络。";
+                thinking.textContent = "连接 AI 失败。请检查 API Key 配置或网络连接。";
             }
         }
 
-        document.getElementById('send-btn').onclick = sendMessage;
-        chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
+        sendBtn.onclick = handleSend;
+        chatInput.onkeydown = (e) => { if (e.key === 'Enter') handleSend(); };
     </script>
 </body>
 </html>
