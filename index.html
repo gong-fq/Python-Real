@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python AI 智能助学系统</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary-color: #2563eb; --secondary-color: #1e40af; --dark-color: #1e293b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 320px 1fr; gap: 20px; height: 95vh; }
+        
+        .sidebar { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow-y: auto; }
+        .lesson-card { padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; }
+        .lesson-card.active { background: var(--primary-color); color: white; }
+
+        .chat-panel { background: white; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; }
+        .chat-header { padding: 20px; background: var(--primary-color); color: white; display: flex; justify-content: space-between; }
+        #chat-container { flex: 1; padding: 20px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 15px; }
+        
+        .message { max-width: 85%; padding: 12px 18px; border-radius: 15px; font-size: 0.95rem; white-space: pre-wrap; }
+        .ai { align-self: flex-start; background: white; border: 1px solid #e2e8f0; }
+        .user { align-self: flex-end; background: var(--primary-color); color: white; }
+        .thinking { color: #64748b; font-style: italic; background: transparent !important; }
+
+        .input-area { padding: 20px; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px 20px; border: 2px solid #f1f5f9; border-radius: 30px; outline: none; }
+        button { background: var(--primary-color); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2 style="margin-bottom:20px"><i class="fas fa-book"></i> 课程进度</h2>
+            <div id="lesson-list">
+                <div class="lesson-card active" data-lesson="1"><h4>第1讲：环境搭建</h4><p>Python安装与配置</p></div>
+                <div class="lesson-card" data-lesson="2"><h4>第2讲：基础语法</h4><p>变量与数据类型</p></div>
+            </div>
+        </div>
+        <div class="chat-panel">
+            <div class="chat-header">
+                <span><i class="fas fa-robot"></i> Python 智能助手</span>
+                <span>当前：第 <span id="cur-lesson">1</span> 讲</span>
+            </div>
+            <div id="chat-container"></div>
+            <div class="input-area">
+                <input type="text" id="chat-input" placeholder="请问关于本节课的问题...">
+                <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chatHistory = []; // 用于保存上下文
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+
+        function addMessage(sender, text) {
+            const msg = document.createElement('div');
+            msg.className = `message ${sender}`;
+            msg.textContent = text;
+            chatContainer.appendChild(msg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return msg;
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            addMessage('user', text);
+            chatInput.value = '';
+            const thinking = addMessage('ai', '正在分析意图并检索知识...');
+            thinking.classList.add('thinking');
+
+            try {
+                const lessonId = document.querySelector('.lesson-card.active').dataset.lesson;
+                const response = await fetch('/.netlify/functions/chat', {
+                    method: 'POST',
+                    body: JSON.stringify({ message: text, lesson: lessonId, history: chatHistory })
+                });
+                
+                const data = await response.json();
+                thinking.remove();
+                addMessage('ai', data.response);
+                chatHistory = data.history || []; // 更新历史记录
+            } catch (err) {
+                thinking.textContent = "连接助手失败，请检查网络。";
+            }
+        }
+
+        document.getElementById('send-btn').onclick = sendMessage;
+        chatInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
+    </script>
+</body>
+</html>
